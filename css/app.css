@@ -41,6 +41,20 @@ body {
     height: 100%;
 }
 
+#content.active {
+    -webkit-filter: none !important;
+    filter: none !important;
+    -webkit-duration: 200ms;
+    transition-duration: 200ms;
+}
+
+#content.inactive {
+    -webkit-filter: grayscale(80%) brightness(80%);
+    filter: grayscale(80%) brightness(80%);
+    -webkit-duration: 200ms;
+    transition-duration: 200ms;
+}
+
 #defs {
     /* Can't be display: none or the clippaths are ignored. */
     position: absolute;
@@ -3514,8 +3528,12 @@ img.tile-removing {
   right: auto;
 }
 
-[dir='rtl'] .preset-list-button-wrap .preset-icon-32 {
-  right: 15px;
+[dir='rtl'] .preset-list-button-wrap .preset-icon-28 {
+  right: 16px;
+}
+
+[dir='rtl'] .preset-list-button-wrap .preset-icon-24 {
+  right: 18px;
 }
 
 [dir='rtl'] .form-field .maxspeed-unit {

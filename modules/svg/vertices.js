@@ -13,6 +13,7 @@ export function svgVertices(projection, context) {
 
     var hover;
 
+
     function siblingAndChildVertices(ids, graph, extent) {
         var vertices = {};
 
@@ -76,6 +77,12 @@ export function svgVertices(projection, context) {
                         var i = z && icon(entity),
                             c = i ? 0.5 : 0,
                             r = rads[i ? 3 : z];
+
+                        // slightly increase the size of unconnected endpoints #3775
+                        if (entity.isEndpoint(graph) && !entity.isConnected(graph)) {
+                            r += 1.5;
+                        }
+
                         this.setAttribute('cx', c);
                         this.setAttribute('cy', -c);
                         this.setAttribute('r', r);
@@ -135,6 +142,7 @@ export function svgVertices(projection, context) {
             .merge(enter)
             .attr('transform', svgPointTransform(projection))
             .classed('shared', function(entity) { return graph.isShared(entity); })
+            .classed('endpoint', function(entity) { return entity.isEndpoint(graph); })
             .call(setAttributes);
     }
 
@@ -158,7 +166,8 @@ export function svgVertices(projection, context) {
 
             if (entity.id in selected ||
                 entity.hasInterestingTags() ||
-                entity.isIntersection(graph)) {
+                entity.isEndpoint(graph) ||
+                entity.isConnected(graph)) {
                 vertices.push(entity);
             }
         }

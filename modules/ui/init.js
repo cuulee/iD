@@ -35,8 +35,13 @@ import { uiCmd } from './cmd';
 
 
 export function uiInit(context) {
+    var uiInitCounter = 0;
+
 
     function render(container) {
+        container
+            .attr('dir', textDirection);
+
         var map = context.map();
 
         var hash = behaviorHash(context);
@@ -59,7 +64,8 @@ export function uiInit(context) {
 
         var content = container
             .append('div')
-            .attr('id', 'content');
+            .attr('id', 'content')
+            .attr('class', 'active');
 
         var bar = content
             .append('div')
@@ -71,10 +77,6 @@ export function uiInit(context) {
             .attr('id', 'map')
             .attr('dir', 'ltr')
             .call(map);
-
-        if (textDirection === 'rtl') {
-            d3.select('body').attr('dir', 'rtl');
-        }
 
         content
             .call(uiMapInMap(context));
@@ -229,6 +231,7 @@ export function uiInit(context) {
 
         var mapDimensions = map.dimensions();
 
+
         function onResize() {
             mapDimensions = utilGetDimensions(content, true);
             map.dimensions(mapDimensions);
@@ -247,6 +250,7 @@ export function uiInit(context) {
                 }
             };
         }
+
 
         // pan amount
         var pa = 10;
@@ -267,10 +271,12 @@ export function uiInit(context) {
 
         context.enter(modeBrowse(context));
 
-        context.container()
-            .call(uiSplash(context))
-            .call(uiRestore(context))
-            .call(uiShortcuts(context));
+        if (!uiInitCounter++) {
+            context.container()
+                .call(uiSplash(context))
+                .call(uiRestore(context))
+                .call(uiShortcuts(context));
+        }
 
         var authenticating = uiLoading(context)
             .message(t('loading_auth'))
@@ -284,10 +290,15 @@ export function uiInit(context) {
             .on('authDone.ui', function() {
                 authenticating.close();
             });
+
+        uiInitCounter++;
     }
 
 
+    var renderCallback;
+
     function ui(node, callback) {
+        renderCallback = callback;
         var container = d3.select(node);
         context.container(container);
         context.loadLocale(function(err) {
@@ -299,6 +310,19 @@ export function uiInit(context) {
             }
         });
     }
+
+
+    ui.restart = function(arg) {
+        context.locale(arg);
+        context.loadLocale(function(err) {
+            if (!err) {
+                context.container().selectAll('*').remove();
+                render(context.container());
+                if (renderCallback) renderCallback();
+            }
+        });
+    };
+
 
     ui.sidebar = uiSidebar(context);
 
